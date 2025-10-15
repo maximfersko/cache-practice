@@ -1,0 +1,69 @@
+
+services:
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - fersko-redis-net
+
+  api:
+    build:
+      context: cache-redis
+      dockerfile: Dockerfile
+    container_name: fersko-api
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_HOST}:5432/${POSTGRES_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    env_file:
+      - .env
+    ports:
+      - "${API_PORT}:8080"
+    networks:
+      - fersko-redis-net
+    depends_on:
+      - postgres
+      - redis
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    env_file:
+      - .env
+    ports:
+      - "${REDIS_PORT}:6379"
+    networks:
+      - fersko-redis-net
+
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: redis-insight
+    restart: always
+    depends_on:
+      - redis
+    ports:
+      - "${REDIS_INSIGHT_PORT}:5540"
+    volumes:
+      - redis-insight-data:/data
+    networks:
+      - fersko-redis-net
+
+volumes:
+  redis-insight-data:
+  postgres-data:
+
+networks:
+  fersko-redis-net:
+    driver: bridge
