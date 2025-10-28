@@ -4,13 +4,19 @@ spring:
       on-profile: default
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/cache_demo}
     hikari:
-      username: ${SPRING_DATASOURCE_USERNAME}
-      password: ${SPRING_DATASOURCE_PASSWORD}
+      username: ${SPRING_DATASOURCE_USERNAME:postgres}
+      password: ${SPRING_DATASOURCE_PASSWORD:password}
       driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -19,6 +25,15 @@ spring:
     properties:
       hibernate:
         format_sql: true
-
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=5m,expireAfterAccess=2m
   flyway:
     enabled: true
+
+logging:
+  level:
+    com.fersko.cacheredis.service: DEBUG
+    com.fersko.cacheredis.config: DEBUG
+    org.springframework.cache: DEBUG
