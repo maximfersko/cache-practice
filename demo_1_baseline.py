@@ -17,61 +17,6 @@ def check_api_availability() -> bool:
         return False
 
 
-def init_test_data() -> Dict:
-    print("[INIT] Создание тестовых данных")
-    print("-" * 60)
-    
-    session = requests.Session()
-    categories = []
-    
-    # Создание категорий
-    for i in range(5):
-        category_data = {
-            "name": f"Category {i+1}",
-            "slug": f"category-{i+1}"
-        }
-        try:
-            response = session.post(
-                f"{BASE_URL}/api/v1/categories", 
-                json=category_data,
-                timeout=10
-            )
-            if response.status_code == 201:
-                categories.append(response.json())
-                print(f"[OK] Категория создана: {category_data['name']}")
-        except Exception as e:
-            print(f"[ERROR] Ошибка создания категории: {e}")
-    
-    # Создание продуктов
-    products = []
-    if categories:
-        for i in range(20):
-            import random
-            category = random.choice(categories)
-            product_data = {
-                "sku": f"SKU-{i+1:03d}",
-                "name": f"Product {i+1}",
-                "description": f"Description for product {i+1}",
-                "categoryId": category["id"]
-            }
-            try:
-                response = session.post(
-                    f"{BASE_URL}/api/v1/products",
-                    json=product_data,
-                    timeout=10
-                )
-                if response.status_code == 201:
-                    products.append(response.json())
-                    print(f"[OK] Продукт создан: {product_data['name']}")
-            except Exception as e:
-                print(f"[ERROR] Ошибка создания продукта: {e}")
-    
-    print("-" * 60)
-    print(f"[INIT] Создано: {len(categories)} категорий, {len(products)} продуктов")
-    print()
-    
-    return {"categories": categories, "products": products}
-
 
 def measure_endpoint(endpoint: str, iterations: int) -> Dict:
     times_ms = []
@@ -91,7 +36,6 @@ def measure_endpoint(endpoint: str, iterations: int) -> Dict:
         elapsed_ms = (end - start) * 1000
         times_ms.append(elapsed_ms)
     
-    # Расчет статистики
     times_sorted = sorted(times_ms)
     p95_index = int(len(times_sorted) * 0.95)
     
@@ -114,27 +58,14 @@ def run_baseline_benchmark():
     print("=" * 60)
     print()
     
-    # Проверка доступности API
     if not check_api_availability():
         print("[ERROR] API недоступно по адресу", BASE_URL)
         return
-    
-    print("[OK] API доступно")
-    print()
-    
-    # Инициализация тестовых данных
-    test_data = init_test_data()
-    
-    if not test_data["categories"]:
-        print("[ERROR] Не удалось создать тестовые данные")
-        return
-    
-    # Пауза для стабилизации БД
+
     print("[WAIT] Пауза 2 секунды для стабилизации БД")
     time.sleep(2)
     print()
     
-    # Тестируемые endpoints
     endpoints = [
         "/api/v1/categories",
         "/api/v1/products"
@@ -177,7 +108,6 @@ def run_baseline_benchmark():
     print(f"Requests per second:  {rps:>8.2f} RPS")
     print()
     
-    # Расчет средних метрик
     avg_time_all = statistics.mean([r["avg_time_ms"] for r in results])
     avg_p95_all = statistics.mean([r["p95_time_ms"] for r in results])
     

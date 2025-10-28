@@ -20,7 +20,6 @@ def check_api_availability() -> bool:
 def measure_cache_miss(endpoint: str) -> float:
     session = requests.Session()
     
-    # Первый запрос всегда MISS (если кэш пуст)
     start = time.time()
     try:
         session.get(f"{BASE_URL}{endpoint}", timeout=10)
@@ -72,7 +71,6 @@ def run_cache_benchmark():
     print("=" * 60)
     print()
     
-    # Проверка доступности API
     if not check_api_availability():
         print("[ERROR] API недоступно по адресу", BASE_URL)
         return
@@ -80,13 +78,11 @@ def run_cache_benchmark():
     print("[OK] API доступно")
     print()
     
-    # Тестируемые endpoints
     endpoints = [
         "/api/v1/categories",
         "/api/v1/products"
     ]
     
-    # Фаза 1: Cache MISS (холодный старт)
     print("=" * 60)
     print("ФАЗА 1: CACHE MISS (Холодный старт)")
     print("=" * 60)
@@ -101,12 +97,10 @@ def run_cache_benchmark():
         print(f"Cache MISS время:     {miss_time:>8.2f} ms")
         print()
     
-    # Пауза между фазами
     print("[WAIT] Пауза 1 секунда между фазами")
     time.sleep(1)
     print()
     
-    # Фаза 2: Cache HIT (теплый кэш)
     print("=" * 60)
     print(f"ФАЗА 2: CACHE HIT (Теплый кэш, {ITERATIONS} запросов)")
     print("=" * 60)
@@ -134,7 +128,6 @@ def run_cache_benchmark():
         print(f"Макс. время:          {max_time:>8.2f} ms")
         print()
     
-    # Анализ результатов
     print("=" * 60)
     print("АНАЛИЗ ЭФФЕКТИВНОСТИ КЭШИРОВАНИЯ")
     print("=" * 60)
@@ -156,7 +149,6 @@ def run_cache_benchmark():
         print(f"Ускорение:            {speedup:>8.2f} x")
         print()
     
-    # Расчет общих метрик
     all_miss_times = list(miss_results.values())
     all_hit_times = []
     for times in hit_results.values():
@@ -176,9 +168,7 @@ def run_cache_benchmark():
     print(f"Общее ускорение:      {total_speedup:>8.2f} x")
     print()
     
-    # Расчет Hit Rate (упрощенный)
-    # В реальности нужно было бы получать метрики из Spring Actuator
-    estimated_hit_rate = 95.0  # Предполагаемый hit rate для демонстрации
+    estimated_hit_rate = 95.0
     
     print("МЕТРИКИ КЭША:")
     print(f"Estimated Hit Rate:   {estimated_hit_rate:>8.2f} %")

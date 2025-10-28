@@ -29,7 +29,7 @@ public class ProductPrice {
     @JoinColumn(name = "product_id", nullable = false, insertable = false, updatable = false)
     private Product product;
     
-    @Column(name = "currency", nullable = false, length = 3)
+    @Column(name = "currency", nullable = false, length = 3, insertable = false, updatable = false)
     private String currency;
     
     @Column(name = "amount", nullable = false, precision = 19, scale = 2)

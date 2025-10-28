@@ -28,7 +28,7 @@ public class Inventory {
     @JoinColumn(name = "product_id", nullable = false, insertable = false, updatable = false)
     private Product product;
     
-    @Column(name = "warehouse_id", nullable = false)
+    @Column(name = "warehouse_id", nullable = false, insertable = false, updatable = false)
     private Long warehouseId;
     
     @Column(name = "quantity", nullable = false)
